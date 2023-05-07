@@ -16,7 +16,7 @@ SERVER_OBJ_PATH 	= server_obj/
 # BONUS_OBJ_PATH = ./fdf_bonus/obj/
 
 CLIENT_SRC     =   main.c \
-				utils.c \
+
 
 SERVER_SRC     =   main.c \
 

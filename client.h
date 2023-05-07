@@ -6,7 +6,7 @@
 /*   By: tlivroze <tlivroze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/05 06:14:45 by tlivroze          #+#    #+#             */
-/*   Updated: 2023/05/05 07:10:49 by tlivroze         ###   ########.fr       */
+/*   Updated: 2023/05/07 02:16:24 by tlivroze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,5 @@
 # include "libft/libft.h"
 
 int	main(int argc, char **argv);
-int	ft_itob(int i);
 
 #endif

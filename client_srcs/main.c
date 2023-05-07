@@ -6,48 +6,49 @@
 /*   By: tlivroze <tlivroze@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/05 06:23:58 by tlivroze          #+#    #+#             */
-/*   Updated: 2023/05/05 13:42:20 by tlivroze         ###   ########.fr       */
+/*   Updated: 2023/05/07 00:59:06 by tlivroze         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../client.h"
 
-int	g_ping = 1;
-
-void	ping(int sig)
+int	send_bit(int pid, unsigned char c, int j)
 {
-	if (sig == SIGUSR1)
-		g_ping = 1;
+	if ((c >> j) & 1)
+		kill(pid, SIGUSR2);
+	else
+		kill(pid, SIGUSR1);
+	return (++j);
 }
 
-int	convsignal(int pid, unsigned char *str)
+void	send(int pid, unsigned char *str)
 {
-	int				i;
-	int				j;
-	unsigned char	sig;
+	static int				i = 0;
+	static int				j = 0;
+	static int				st_pid = 0;
+	static unsigned char	*st_str = NULL;
 
-	(void)pid;
-	i = 0;
-	while (str[i])
+	if (pid && str)
 	{
-		sig = str[i];
-		printf("%c\n", sig);
-		j = 0;
-		while (j < 8 && g_ping)
-		{
-			g_ping = 0;
-			if (sig % 2 == 0)
-				kill(pid, SIGUSR1);
-			else
-				kill(pid, SIGUSR2);
-			sig = sig / 2;
-			if (g_ping == 0)
-				pause();
-			j++;
-		}
-		i++;
+		st_pid = pid;
+		st_str = str;
 	}
-	return (0);
+	j = send_bit(st_pid, st_str[i], j);
+	if (j == 8)
+	{
+		i++;
+		j = 0;
+	}
+}
+
+void	receive(int sig)
+{
+	if (sig == SIGUSR1)
+		send(0, NULL);
+	else if (sig == SIGUSR2)
+		exit(EXIT_SUCCESS);
+	else
+		return (write(2, "wrong signal, forbidden", 23), exit(EXIT_FAILURE));
 }
 
 int	main(int argc, char **argv)
@@ -56,10 +57,15 @@ int	main(int argc, char **argv)
 	unsigned char	*str;
 
 	if (argc != 3)
-		return (printf("wrong number of arguments !"), 1);
+		return (write(2, "wrong number of arguments !", 27), 1);
 	pid = ft_atoi(argv[1]);
+	if (pid < 0 || !pid)
+		return (write(2, "wrong pid !", 11), 1);
 	str = (unsigned char *)argv[argc - 1];
-	signal(SIGUSR1, &ping);
-	convsignal(pid, str);
+	send(pid, str);
+	signal(SIGUSR1, &receive);
+	signal(SIGUSR2, &receive);
+	while (1)
+		pause();
 	return (0);
 }
